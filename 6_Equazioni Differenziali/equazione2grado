@@ -1,0 +1,48 @@
+clear all;
+close all;
+clc;
+n=201;
+ta=0;
+tb=6;
+h=(tb-ta)/(n-1);
+h2=0.5*h;
+t=linspace(ta,tb,n);
+u=zeros(1,n); % questo rappresenta la x/y
+v=zeros(1,n);% questo rappresenta la x'/y'
+u(1)=5.; v(1)=0; 
+% applico RK4
+for i=1:n-1
+    k1=f(t(i),u(i),v(i));
+    l1=g(t(i),u(i),v(i));
+    k2=f(t(i)+h2,u(i)+h2*k1,v(i)+h2*l1);
+    l2=g(t(i)+h2,u(i)+h2*k1,v(i)+h2*l1);
+    k3=f(t(i)+h2,u(i)+h2*k2,v(i)+h2*l2);
+    l3=g(t(i)+h2,u(i)+h2*k2,v(i)+h2*l2);
+    k4=f(t(i)+h,u(i)+h*k3,v(i)+h*l3);
+    l4=g(t(i)+h,u(i)+h*k3,v(i)+h*l3);
+    u(i+1)=u(i)+h*(k1+2*k2+2*k3+k4)/6;
+    v(i+1)=v(i)+h*(l1+2*l2+2*l3+l4)/6;
+ 
+end
+fprintf ("Test del periodo con RK4 \t\t\t%e\t%e\n",u(n)-u(1), v(n)-v(1));
+figure
+hold on
+plot(t,u,"r")% u è la y
+plot(t,v,"b")% v è la derivata
+%figure
+%plot(u,v,"k")% rappresentazione del diagramma di fase
+%hold on
+q=fgg(t)
+plot(t,q,"g--")
+hold off
+figure
+plot(t,u,"r",t,q,"b--")% u è la y
+function q=fgg(x)% soluzione esatta
+        q=-x-exp(-x)+6
+end
+function z=f(t,u,v)
+    z=v;
+end
+function z=g(t,u,v)
+    z=-1-v;
+end
