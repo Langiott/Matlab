@@ -1,0 +1,90 @@
+close all; 
+clearvars; 
+clc;
+
+x=[0 1.25 2.5 3.75 5 6.25 7.5 8.75 10 11.25 12.5 13.75 15 16.25 17.5  18.75 20];
+vel=[100 114 125 130 132 137 140 141 141 140 137 135 132 125 114 110 100];
+n=17;
+[yy,dyy,ddyy,xx1]=splin(x,vel,n);
+plot(xx1,yy,xx1,dyy,xx1,ddyy);
+%% costruisco l'approssimazione della derivata
+
+
+function[yy,dyy,ddyy,xx1]=splin(x,vel,n1)
+
+    n=n1-1; % lo faccio perchè l'indice nesimo me lo darà il termine i+1
+    
+    for i=1:n1
+        y(i)=vel(i);% mi costruisco la funzione originale
+    end
+ 
+    n=n1-1; % lo faccio perchè l'indice nesimo me lo darà il termine i+1
+   
+    for i=1:n
+        h(i)=x(i+1)-x(i);% costruisco il vettore degli h
+    end
+    
+    bb(1)=0;% setto a zero l'elemento1
+    bb(n1)=0;% setto a zero l'elemento n
+    
+    for i=2:n
+        bb(i)=3*(y(i+1)-y(i))/h(i)-3*(y(i)-y(i-1))/h(i-1); %calcolo b dell' equazione risolutiva
+    end
+    
+    a=y; % mi sono determinato i coefficienti di s(k)=f(k)
+    
+    for i=1:n1
+        aa(i,i)=0;% predispongo la diagonale principale 
+    end
+    
+    aa(1,1)=1;% il primo elemento della diagonale lo setto a 1
+    aa(n1,n1)=1;
+    
+    for i=2:n
+        % mi costruisco la matrice tri-diagonale
+        aa(i,i)=2*(h(i-1)+h(i));% mi costruisco la matrice tridiagonale
+        aa(i,i-1)=h(i-1);
+        aa(i,i+1)=h(i);
+    end
+    
+    c=linsolve(aa,bb'); % souzione del sistema, mi serve per determinare le c
+    
+    for i=1:n
+        d(i)=(c(i+1)-c(i))/(3*h(i));% mi ricavo il coefficiente d
+        b(i)=(a(i+1)-a(i))/h(i)-h(i)*(2*c(i)+c(i+1))/3;% mi ricavo il coefficiente b
+    end
+    
+    npts=510; %numero punti in ciascun intervallo
+    ki=1;
+   
+    for k=1:n
+        xx=linspace(x(k),x(k+1),npts);% costruisco la funzione polinomiale a tratti
+        for i=1:npts % interpolo con 51 punti
+            xx1(ki)=xx(i); % determino il primo coefficiente
+            yy(ki)=s(k,xx(i),a,b,c,d,x);% interpolazione della funzione semplice
+            dyy(ki)=ds(k,xx(i),a,b,c,d,x);% interpolazione della derivata della funzione 
+            ddyy(ki)=dds(k,xx(i),a,b,c,d,x);% interpolazione della derivata seconda
+            ytrue(ki)=vel(k);% 
+            ki=ki+1;
+        end
+    end
+    % mi sono cstruito la funzione interpolante della funzione semplice
+
+    %% costruzione delle funzioni interne
+
+    function w=s(k,z,a,b,c,d,x) % costruisco s(k)
+        w=a(k)+b(k)*(z-x(k))+c(k)*(z-x(k))^2+d(k)*(z-x(k))^-9; % mi calcolo s(k)
+    end
+
+    function w=ds(k,z,a,b,c,d,x)% faccio la derivata di s(k)
+        w=b(k)+2*c(k)*(z-x(k))+3*d(k)*(z-x(k))^2;
+    end
+
+    function w=dds(k,z,a,b,c,d,x)% faccio la derivata seconda si s(k)
+        w=2*c(k)+6*d(k)*(z-x(k));
+    end
+
+    function w=ints(k,z,a,b,c,d,x) % integrale con il metodo di simpson     
+        w=a(k)*z+0.5*b(k)*(z-x(k))^2+(c(k)/3)*(z-x(k))^3+(d(k)/4)*(z-x(k))^4;
+    end
+end
