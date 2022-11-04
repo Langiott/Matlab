@@ -1,0 +1,106 @@
+clear all;
+close all;
+clc;
+global omega1sq omega2sq lambda;
+n=1001;
+ta=0;
+tb=2*pi;
+h=(tb-ta)/(n-1);
+h2=0.5*h;
+t=linspace(ta,tb,n);
+omega1sq=1.; % questa è una oscillazione della molla 
+omega2sq=3.; % questa è l'oscillazione dell'asta
+lambda = omega2sq/omega1sq;
+u=zeros(1,n);
+v=zeros(1,n);
+K=zeros(1,n);
+%u0=acos(1/(2*lambda)); 
+u0=0;% configurazione di equilibrio
+v0=1;% velocità  iniziale
+u(1)=u0; v(1)=v0; 
+K(1)=fK(u0,v0);
+for i=1:n-1
+    k1=f(t(i),u(i),v(i));
+    l1=g(t(i),u(i),v(i));
+    k2=f(t(i)+h2,u(i)+h2*k1,v(i)+h2*l1);
+    l2=g(t(i)+h2,u(i)+h2*k1,v(i)+h2*l1);
+    k3=f(t(i)+h2,u(i)+h2*k2,v(i)+h2*l2);
+    l3=g(t(i)+h2,u(i)+h2*k2,v(i)+h2*l2);
+    k4=f(t(i)+h,u(i)+h*k3,v(i)+h*l3);
+    l4=g(t(i)+h,u(i)+h*k3,v(i)+h*l3);
+    u(i+1)=u(i)+h*(k1+2*k2+2*k3+k4)/6;
+    v(i+1)=v(i)+h*(l1+2*l2+2*l3+l4)/6;
+%    K(i+1)=fK(u(i+1),v(i+1));
+%    fprintf ("%e\n", K(i+1)-K(1));
+end
+%figure
+%plot(t,u,"r",t,v,"b")
+%hold on
+%figure
+%plot(u,v,"k")
+%hold on
+%figure
+%plot(t,K-K(1),"k")
+%axis([0 tb -0.001 0.001]);
+%hold on
+%figure
+
+% Animazione
+h=circle(0,0,1);
+
+%% Assi
+
+
+assex = line([-1,1], [0,0]);
+assey = line([0,0], [-1,1]);
+axis ([-1.2 1.2 -1.2 1.2]);
+hold on
+asta = line ([0,sin(u0)] , [0,-cos(u0)],'LineWidth',2.0);
+molla = line ([0,sin(u0)] , [0,0],'LineWidth',3.0,'LineStyle',':');
+rball=0.04;
+
+th = 0:pi/20:2*pi; % questo serve per plottere il cerchio
+xunit = rball * cos(th) + sin(u0)% individua la posizione iniziale dell'asse x
+yunit = rball * sin(th) - cos(u0)% individua la posizione iniziale dell'asse y
+ball = fill(xunit, yunit,'r');% disegno il cerchio
+%get(ball);
+% movimento
+
+for i=1:n
+    set (asta, 'XData',[0 ,sin(u(i))], 'YData',[0, -cos(u(i))],'LineWidth',2.0 );
+    set (molla, 'XData',[sin(u(i)),sin(u(i))], 'YData',[-cos(u(i)), 0],'LineWidth',3.0,'LineStyle',':' );
+    xunit = rball * cos(th)+ sin(u(i));
+    yunit = rball * sin(th)- cos(u(i));
+    hold on
+    set (ball, 'XData',xunit,'YData',yunit);
+%   h = fill(xunit, yunit,'k');
+    hold off
+    drawnow limitrate; % è questo che permette l'animazione 
+    pause(0.05)
+end
+%tr = (1/16:1/8:1)'*2*pi;
+%x = cos(tr);
+%y = sin(tr);
+
+
+%% funzioni
+
+function z=f(t,u,v)
+    z=v;
+end
+function z=g(t,u,v)
+global omega1sq omega2sq lambda;
+    z=-1.5*omega1sq*(1-2*lambda*cos(u))*sin(u);
+end
+function z=fK(u,v)
+global omega1sq omega2sq lambda;
+    z=v^2+3*omega1sq*(lambda*cos(u)^2-cos(u));
+end
+function h = circle(x,y,r)
+    hold on
+    th = 0:pi/50:2*pi;
+    xunit = r * cos(th) + x;
+    yunit = r * sin(th) + y;
+    h = plot(xunit, yunit,'--');
+    hold off
+end
