@@ -1,0 +1,29 @@
+close all;
+clear all;
+clc;
+%a=[1,2,3;6,7,8;-1,-3,3]
+a=[-3,2,3,5;6,7,8,-4;-1,-3,3,-2;2,-4,6,-5]
+aa=a;
+n=length(a);
+for i=1:n
+  for j=1:n
+    m(i,j)=0;% costruisco una matrice di appoggio conzeri fuori della diagonale
+  end
+  m(i,i)=1;% setto a 1 gli elementi diagonali della matrice
+end
+m
+% ricordiamoci che la matrice deve essere costruita in modo tale che il
+% prodotto LU dia A
+for k=1:n-1
+  piv=a(k,k);
+  for i=k+1:n % avdo dal secondo elemento degli elementi della sovra diagonale
+    a1=a(i,k) % la i mi seleziona la riga e la k la colonna 
+    m(i,k)=a1/piv% in queusto modo ho costruito la L
+    for j=k:n
+      a(i,j)=a(i,j)-a(k,j)*m(i,k);% in questo modo ho cstruito la U
+    end
+  end
+end
+U=a
+L=m
+L*U
