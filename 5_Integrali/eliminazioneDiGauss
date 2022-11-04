@@ -1,0 +1,30 @@
+% eliminazione di gauss
+close all;
+clear all;
+clc;
+a=[3.333 16920 -10.333; 2.222 16.71 9.612; 1.5611 5.1791 1.6852];
+b=[15913 28.544 8.4254];
+n=length(a);
+ab=[a,b'];% costruisco a matrice completa
+eg=ELG(a,b,ab,n);% chiamata della funzione 
+a*eg'
+function elGauss=ELG(a,b,ab,n)
+    for i=1:n-1 % mi serve fino all' penultimo elemento in quanto l'ltimo elemento non è nullo
+        piv=ab(i,i);% mi individua l'elemento diagonale
+        for j=i+1:n
+            ab(j,:)=ab(j,:)-ab(j,i)*ab(i,:)/piv;% formula per la riduzione a scala 
+            %a(j,:) mmi estrae la riga
+        end
+        ab;
+        for i=n:-1:1
+        i;
+        sum1=0.0;% applico il metodo di jacobi
+            for j=i+1:n% lo faccio scorrere fino a n quinid non considere gli elemetni di b
+                sum1=sum1+ab(i,j)*x(j);% definisco la sommatoria
+            end
+        ab(i,n+1); %ho preso gli elementi di b in quanto gli n+1 sono costanti
+        x(i)=(ab(i,n+1)-sum1)/ab(i,i);% formula per la risoluzione dei sistemi
+        end
+    elGauss=x;
+    end
+end
