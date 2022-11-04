@@ -1,0 +1,94 @@
+%% esame 10 MARZO 2021
+clear all; close all; clc;
+%% esercizio 1 : METODO DI BISEZIONE 
+
+f= @(x) x*exp(-x)-1;%costruisco una funzione handle
+
+x=linespace(0,1,100)%predispongo i nodi nel piano cartesiano con 100 punti 
+y1=f(x);
+
+plot (x,y) %funzione per rappresentare la funzione 
+hold on;grid
+toll= 10e-6; %tolleranza ammessa 
+a=0, %estremi 
+b=1;
+
+err=inf;  %inizializzo la variabile errore con un valore a caso 
+
+an=a; %creo delle successioni con valori iniziali uguali agli estremi 
+bn=b;
+
+while err> toll %finchè la disuguaglianza è verificata il programma esegue le istruzioni
+    
+    cn=(an+bn)/2; %valore medio 
+    
+    %sviluppo  il metodo di bisezione 
+    if f(an)*f(cn)<0
+        an=an;
+        bn=cn;
+    elseif f(cn)*f(bn)<0
+        an=cn;
+        bn=bn;    
+    else
+        err=0;
+        if f(an)==0
+            cn=an;
+            break
+        else
+            cn = bn;
+            break
+        end
+    end
+    err = abs(bn-an) %aggiorno il valore dell errore 
+end
+
+zero=cn % restituisco  il valore della funzione 
+
+plot(zero,f(zero),'b');
+fprintf('\r\tMETODO DI BISEZIONE\r\n')
+fprintf('zero = %f\r errore= %e\r',zero,err)
+% stampo nella Command Window i valori richiesti piu l errore 
+%che si commette arrotondando con il metodi di bisezione 
+
+
+%% esercizio 2 : EQUAZIONE DIFFERENZIALE RUNGE-KUTTA 4 
+
+f = @(x)-0.01*x.^2+0.1*x; %funzione handle 
+
+x0 = 2; %condizione iniziale 
+
+a = 0.5; %non abbiamo un intervallo ma un punto  
+b = 0.5;
+prec = 1e-5; % svolge la stessa funzione della variabile toll
+
+err = inf; 
+n = 1;
+
+while err > prec
+    appo=0;
+    n = n+2;
+    x = linspace(a, b, n);
+    y = x;
+    y(1) = x0;
+    
+    h = x(2)-x(1);
+    h2 = h/2;
+    
+    %costruisco gli elementi per i coefficenti del metodo di R-K
+    for i = 1:length(x)-1
+        k1 = f(x(i), y(i));
+        k2 = f(x(i) + h2, y(i) + k1*h2);
+        k3 = f(x(i) + h2, y(i) + k2*h2);
+        k4 = f(x(i) + h, y(i) + k3*h);
+        
+        y(i+1) = y(i) + h*(k1 + 2*k2 + 2*k3 + k4)/6;
+    end
+    %errore viene aggiornato ogni volta che si ripete il ciclo while 
+    err = abs(y(end)-appo);
+    appo= y(end);%variabile di appoggio che indica il valore dell' errore "vecchio"
+    
+end
+
+fprintf('Runge-Kutta IV stadio in t = 0.5 vale : %f\r', y(x==0.5));
+
+
