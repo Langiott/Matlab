@@ -1,0 +1,54 @@
+%ALLOCAZIONE AUTOVALORI A  CICLO CHIUSO A PIACIMENTO nell'ipotesi stato accessibile
+
+n=3;  %numero di variabili di stato
+m=1; %numero di ingressi
+p=3; %numero di uscite
+
+A=[1 0 0.8;1 0.5 2;0 0 1.2];
+B=[1;0; 0];
+C=eye(p);
+D=zeros(p,m);
+
+
+%CALCOLO DELLA MATRICE DI RAGGIUNGIBILITA'
+Mr=ctrb(A,B);
+nr=rank(Mr)
+%il sistema non e' raggiungibile
+
+%SOLUZIONE HARDWARE
+B=[1 0;0 0; 0 1];
+m=2;
+Mr=ctrb(A,B);
+nr=rank(Mr)
+%il sistema  e' raggiungibile
+K=place(A,B,[0.3 0.4 0.5]);
+eig(A-B*K)
+
+%rappresentazione in spazio di stato del sistema a ciclo chiuso
+
+Ac=A-B*K;
+Bc=B;
+Cc=C;
+Dc=zeros(p,m);
+
+
+
+
+% simulazione
+N=50; %numero di campioni
+x0=ones(n,1);
+r=ones(N,m); %ingresso di riferimento
+[Y,X]= dlsim(Ac,Bc,Cc,Dc,r,x0);
+figure;
+subplot(311),
+plot(Y(:,1)),title('prima componente di y(k)');
+grid
+subplot(312)
+plot(Y(:,2)),title('seconda componente di y(k)');
+grid
+subplot(313)
+plot(Y(:,3)),title('terza componente di y(k)');
+grid
+
+eig(Ac+Bc*K)
+
