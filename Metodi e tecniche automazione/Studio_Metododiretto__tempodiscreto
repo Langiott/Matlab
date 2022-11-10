@@ -1,0 +1,60 @@
+Ps=zpk([],[-1 -1 -1],1);
+[yp, time]= step(Ps,15);
+figure;
+plot(time,yp);
+grid;
+%parametri del modello;
+K=1;
+tau=0.75;
+T=4.5-tau;
+%parametri del pid
+Kp=1.2*T/(K*tau);
+taui=2*tau;
+taud=0.5*tau;
+N=10;
+n_pid=[Kp*(1+N)*taui*taud Kp*(N*taui+taud) Kp*N];
+d_pid= [taui*taud N*taui 0];
+pid=tf(n_pid,d_pid);
+tc=0.01 % meglio sceglierlo piccolo
+% il comando c2d discretizza il primo parametro con il tempo di
+% campionamento specificato nel secondo parametro  con la tecnica zoh
+Pz= c2d(Ps,tc,'zoh'); 
+pidz= c2d(pid,tc,'zoh');
+fz=pidz*Pz;
+Wz=feedback(fz,1);
+
+%simulazione
+
+[n_wz,d_wz]=tfdata(Wz,'v');
+t=0:tc:20;
+tt=size(t);
+t1=(:,2);
+r=ones(t1,1);
+yd=dlsim(n_wz,d_wz,r);
+figure;
+plot(t,yd);
+grid;
+
+%la rispsota al gradino oscilla troppo, posso pensare di filtrare il
+%segnale di ingresso con un filtro per migliorarla
+filtro=tf(1,[1 1]);
+filtroz=c2d(filtro,tc,'zoh');
+[n_f,d_f]=tfdata(filtroz,'v');
+%r1 � il segnale filtrato 
+r1=dlsim(n_f,d_f,r);
+figure;
+plot(t,r,'b',t,r1,'r');
+grid;
+yd1=dlsim(n_wz,d_wz,r1);
+figure;
+plot(t,yd,'b',t,yd1,'r');
+grid;
+
+
+
+
+
+
+
+
+
